@@ -2,6 +2,7 @@
 .venv
 data
 examples
+minilabs
 
 
 test.py
