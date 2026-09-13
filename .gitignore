@@ -1,11 +1,17 @@
 
-.venv
+
 data
 examples
 minilabs
 
-
 test.py
 
-# 
+__pycache__/
+*.pyc
+
+.venv
+
 .env
+.idea/
+.vscode/
+
