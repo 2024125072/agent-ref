@@ -2,7 +2,7 @@
 
 
 
-from .agentCore import (
+from .core import (
     AgentCoreError,
     ClientInitError
 )

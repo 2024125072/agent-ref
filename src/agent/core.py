@@ -10,10 +10,13 @@ from .errors import (
 
 
 class AgentCore:
-    def __init__(self, name, goal, depth, max_depth = 1, client = None, api_key = None, base_url = None):
+    def __init__(self, name, task, depth, max_depth = 1, max_step = 5,
+                  client: AsyncOpenAI = None, api_key: str = None, base_url: str = None):
         self.name = name
-        self.goal = goal
-        self.context = None
+        self.task = task
+        self.depth = depth
+        self.max_depth = max_depth
+        self.max_step = max_step
 
         # set client
         if client is None:
@@ -27,10 +30,7 @@ class AgentCore:
             
         self.client = client
 
-    def _get_tools():
-        pass
-
-    async def run(self, max_step = 5):
+    async def run(self):
         pass
 
 
