@@ -38,7 +38,7 @@ class OpenAILLM(BaseLLM):
             if model.id
         ]
 
-    def list(self) -> list[str]:
+    def models(self) -> list[str]:
         return self.get_available_models()
 
     def chat(

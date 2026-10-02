@@ -27,7 +27,7 @@ class OllamaLLM(BaseLLM):
 
         return [model.model for model in response.models if model.model]
 
-    def list(self) -> list[str]:
+    def models(self) -> list[str]:
         return self.get_available_models()
 
     def chat(

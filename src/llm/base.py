@@ -7,7 +7,7 @@ from .types import ChatOptions, LLMResponse
 class BaseLLM(ABC):
 
     @abstractmethod
-    def list(self) -> list[str]:
+    def models(self) -> list[str]:
         """
         현재 Provider에서 사용할 수 있는 모델 목록을 반환한다.
         """
