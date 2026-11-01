@@ -36,7 +36,7 @@ pip install -r requirements.txt
 
 `.env` 파일에 `KAU_API_KEY`, `OPENAI_BASE_URL`, `MODEL_NAME`을 지정한다.
 
-`data/documents.json` 경로에 문서를 준비한다. (기존 tools.py 에 문서가 들어있어서 따로 준비 안해도 실행 가능)
+`data/documents.json` 경로에 문서를 준비한다.
 또는 `DOCUMENTS_FILE = data/documents.json` 부분을 수정하고 원하는 경로에 문서를 배치한다.
 
 ### 테스트 코드

@@ -1,21 +1,23 @@
 flowchart TD
-    START([START]) --> planner[planner\n계획 생성]
-    planner -->|success| plan_review[plan_review\ninterrupt로 승인/수정 요청]
-    planner -->|error| finalizer[finalizer\n최종 답변 생성]
+    START([START]) --> planner[planner<br/>계획 생성]
+    planner -->|success| plan_review[plan_review<br/>interrupt로 승인/수정 요청]
+    planner -->|error| finalizer[finalizer<br/>최종 답변 생성]
 
-    plan_review -->|approved| executor[executor\n현재 PlanStep 실행]
-    plan_review -->|feedback| plan_editor[plan_editor\n피드백 반영해 계획 재작성]
+    plan_review -->|approved| executor[executor<br/>현재 PlanStep 실행]
+    plan_review -->|feedback| plan_editor[plan_editor<br/>피드백 반영해 계획 재작성]
+
     plan_editor -->|success| plan_review
     plan_editor -->|error| finalizer
 
-    executor --> checker[checker\ncontinue / replan / finish 판단]
-    executor -->|failed and replan_count >= MAX_REPLANS| finalizer
+    executor -->|success| checker[checker<br/>continue / replan / finish 판단]
+    executor -->|failed and<br/>replan_count < MAX_REPLANS| replanner[replanner<br/>남은 계획 수정]
+    executor -->|failed and<br/>replan_count >= MAX_REPLANS| finalizer
 
     checker -->|continue| executor
-    checker -->|replan| replanner[replanner\n남은 계획 수정]
+    checker -->|replan| replanner
     checker -->|finish| finalizer
 
     replanner -->|success| executor
-    replanner -->|error or replan limit exceeded| finalizer
+    replanner -->|error or<br/>replan limit exceeded| finalizer
 
     finalizer --> END([END])
