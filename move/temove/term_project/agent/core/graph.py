@@ -1,33 +1,7 @@
-"""Week 7 LangGraph orchestration for the Week 6 Plan–Execute–Replan agent.
-
-Only the *outer* plan-level loop is a graph. The Executor keeps its original
-inner Python LLM/tool-call loop in ``agent.plan.executor``.
-
-A new turn is submitted with ``create_turn_input(question, prior_state)``.
-The graph pauses after planning; resume using ``Command(resume=...)`` and the
-SAME ``thread_id``. The checkpointer is in memory, so it does not survive a
-Python process restart.
-
-Example (from the app/ directory)::
-
-    from langgraph.types import Command
-    from agent.core.graph import build_graph, create_turn_input
-
-    app = build_graph()  # uses agent.core.llm and environment variables
-    config = {"configurable": {"thread_id": "demo-1"}, "recursion_limit": 100}
-    paused = app.invoke(create_turn_input("회사 출장 규정 알려줘"), config=config)
-    print(paused["__interrupt__"][0].value)
-    result = app.invoke(Command(resume={"approved": True}), config=config)
-    print(result["final_response"])
-
-To request a natural-language plan edit, resume with::
-
-    Command(resume={"approved": False, "feedback": "숙박비와 식비를 별도 단계로 나눠줘"})
-
-The model revises the plan, and the graph interrupts for another approval.
-Legacy structured edits using ``steps`` are still supported.
+""" 
+이게 이번 과제의 핵심 파일.
+기존 agent 를 langgraph 기반으로 바꾸는 부분.
 """
-
 from __future__ import annotations
 
 import json
@@ -62,11 +36,8 @@ TURN_ERRORS = (TurnBudgetExceeded, ValueError, RuntimeError)
 def create_turn_input(
     user_message: str, previous_state: AgentState | None = None
 ) -> AgentState:
-    """Prepare a fresh turn, preserving completed turns/summary if provided.
-
-    For another user message in the SAME thread, pass
-    ``app.get_state(config).values`` as ``previous_state`` after the prior turn
-    has finished. Do not begin another turn while plan approval is pending.
+    """
+    새 turn을 시작하기 위한 입력 state를 생성. 이전 turn이 진행 중이면 오류 발생.
     """
     if not isinstance(user_message, str) or not user_message.strip():
         raise ValueError("user_message must be a non-empty string.")
@@ -320,7 +291,7 @@ def route_after_executor(state: AgentState) -> Literal["checker", "replanner", "
 def checker_node(
     state: AgentState, *, client: Any, model: str, debug: bool
 ) -> dict[str, Any]:
-    """Use the original LLM Checker and apply Week 6 step-state transitions."""
+    """plan에서 현재 step의 결과를 평가하고 progress를 반환. 실패하면 turn_status를 failed로 설정."""
     working = deepcopy(state)
     task = working["current_task"]
     result = working["step_result"]
@@ -461,45 +432,53 @@ def build_graph(
     tool_executor: Callable[..., dict[str, Any]] | None = None,
     checkpointer: Any | None = None,
 ):
-    """Compile the outer loop with a checkpointer for interrupt/resume.
-
-    Client/tools are runtime dependencies captured by nodes; they are NOT
-    stored in the checkpointed AgentState. Pass a stable ``thread_id`` when
-    calling invoke/stream. Provide injected fake client/tools in tests.
+    """
+    여기가 이번 과제의 핵심.
+    실제 에이전트 루프를 그래프로 만드는 부분임
     """
     from langgraph.checkpoint.memory import InMemorySaver
     from langgraph.graph import END, START, StateGraph
 
+    # llm 클라이언트 정의
     if client is None:
         from agent.core.llm import create_client
         client = create_client()
     if model is None:
         model = os.getenv("MODEL_NAME") or client.models.list().data[0].id
 
+    # 그래프 빌드 시작
     builder = StateGraph(AgentState)
+    # 플래너 노드 정의
     builder.add_node("planner", partial(
         planner_node, client=client, model=model,
         recent_turns=recent_turns, use_summary=use_summary, debug=debug,
     ))
+    # 계획 검토 노드 정의
     builder.add_node("plan_review", plan_review_node)
+    # 계획 수정 노드 정의
     builder.add_node("plan_editor", partial(
         plan_editor_node, client=client, model=model, debug=debug,
     ))
+    # 실행 노드 정의
     builder.add_node("executor", partial(
         executor_node, client=client, model=model, debug=debug,
         tools=tools, tool_executor=tool_executor,
     ))
+    # 진행 체크 노드 정의
     builder.add_node("checker", partial(
         checker_node, client=client, model=model, debug=debug,
     ))
+    # 재계획 노드 정의
     builder.add_node("replanner", partial(
         replanner_node, client=client, model=model, debug=debug,
     ))
+    # 최종 답변 노드 정의
     builder.add_node("finalizer", partial(
         finalizer_node, client=client, model=model,
         recent_turns=recent_turns, use_summary=use_summary, debug=debug,
     ))
 
+    # 노드 연결 정의
     builder.add_edge(START, "planner")
     builder.add_conditional_edges("planner", route_after_planner,
                                   {"review": "plan_review", "finalizer": "finalizer"})
@@ -519,6 +498,11 @@ def build_graph(
 
 
 if __name__ == "__main__":
+    """
+    테스트 코드임
+    실행:
+        python -m agent.core.graph
+    """
     from langgraph.types import Command
 
     question = (

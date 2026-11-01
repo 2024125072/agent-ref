@@ -41,11 +41,13 @@ from typing import Any, Literal, TypedDict
 Message = dict[str, Any]
 TraceEvent = dict[str, Any]
 
+# 각 상태가 가질 수 있는 값들을 정의
 PlanStepStatus = Literal[
     "pending", "in_progress", "completed", "failed", "replaced"
 ]
 TurnStatus = Literal["idle", "running", "completed", "failed"]
 ProgressDecision = Literal["continue", "replan", "finish"]
+
 
 
 class PlanStep(TypedDict):
@@ -73,14 +75,14 @@ class TaskState(TypedDict):
 
 
 class StepResult(TypedDict):
-    """Result returned by the existing execute_plan_step()."""
+    """execute_plan_step()의 결과"""
 
     status: Literal["completed", "failed"]
     content: str
 
 
 class ProgressResult(TypedDict):
-    """Decision returned by the existing check_progress()."""
+    """check_progress()의 결과"""
 
     decision: ProgressDecision
     reason: str
@@ -111,7 +113,7 @@ def create_plan_step(
     instruction: str,
     depends_on: list[int],
 ) -> PlanStep:
-    """Create a plan step with the Week 6 initial tool-call message."""
+    """plan step 생성 후 반환"""
     return {
         "id": plan_step_id,
         "instruction": instruction,

@@ -28,13 +28,16 @@ app/
 
 ## 실행 방법
 
-프로젝트의 루트 디렉터리에서 실행한다.
+프로젝트의 루트 디렉터리에서 실행한다. (테스트는 python 3.12.9 에서 함)
 
 ```powershell
 pip install -r requirements.txt
 ```
 
 `.env` 파일에 `KAU_API_KEY`, `OPENAI_BASE_URL`, `MODEL_NAME`을 지정한다.
+
+`data/documents.json` 경로에 문서를 준비한다. (기존 tools.py 에 문서가 들어있어서 따로 준비 안해도 실행 가능)
+또는 `DOCUMENTS_FILE = data/documents.json` 부분을 수정하고 원하는 경로에 문서를 배치한다.
 
 ### 테스트 코드
 ```powershell
@@ -49,7 +52,12 @@ question = (
 계획이 출력되면 Enter로 승인하거나 자연어로 수정 요청을 입력한다.
 
 ### test_langgraph_agent.ipynb 실행
-제출용 테스트는 `test_langgraph_agent.ipynb`를 열어 Restart Kernel → Run All → Save 순서로 실행·저장한다.
+* 제출용 테스트는 `test_langgraph_agent.ipynb`를 열어서 초기화, 공통 출력·실행 헬퍼 부분을 실행한다.
+* 1.도구 능력 밖의 질문, 2.정상 과제 부분을 실행하고 결과를 확인한다.
+* 3.checkpoint검증을 통해 Checkpointer와 thread_id를 사용하여 중단 후 재개를 테스트 한다.
+* 4.계획 수정 테스트를 통해 자연어로 요청한 계획 수정이 이루어 졌는지 확인한다.
+* 5.summary 테스트를 통해 3턴 이후 summary가 생성되는지 확인한다.
+* 6.최종 점검으로 모든 요구사항을 만족하는지 확인한다.
 
 ## 구현 설명
 
