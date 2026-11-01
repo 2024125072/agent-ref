@@ -1,0 +1,8 @@
+openai
+python-dotenv
+
+# 그래프로 바꾸는 것이 과제임
+langgraph
+
+# 임베딩에서 사용
+sentence-transformers
