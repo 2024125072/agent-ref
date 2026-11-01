@@ -5,7 +5,7 @@
 ## 주요 파일 구조
 
 ```text
-term_project/
+app/
 ├── agent/
 │   ├── core/
 │   │   ├── graph.py          # LangGraph로 에이전트 그래프 구성
@@ -36,7 +36,7 @@ pip install -r requirements.txt
 
 `.env` 파일에 `KAU_API_KEY`, `OPENAI_BASE_URL`, `MODEL_NAME`을 지정한다.
 
-#### 테스트 코드
+### 테스트 코드
 ```powershell
 python -m agent.core.graph
 ```
@@ -48,7 +48,7 @@ question = (
 
 계획이 출력되면 Enter로 승인하거나 자연어로 수정 요청을 입력한다.
 
-#### test_langgraph_agent.ipynb 실행
+### test_langgraph_agent.ipynb 실행
 제출용 테스트는 `test_langgraph_agent.ipynb`를 열어 Restart Kernel → Run All → Save 순서로 실행·저장한다.
 
 ## 구현 설명
@@ -60,7 +60,8 @@ question = (
 - 승인(Enter): `Command(resume={"approved": True})` → `executor` 실행
 - 수정(자연어): `Command(resume={"approved": False, "feedback": "수정 요청"})` → `plan_editor`에서 LLM이 계획 재작성 → `plan_review`에서 재승인
 
-#### 테스트 예시
+### 테스트 예시
+```
 [계획 검토]
 목표: 2026년 해외 출장의 숙박비와 식비 한도, 그리고 출발 전 승인 요건을 근거 문서와 함께 정리해줘.
 질문: 이 계획을 승인하거나 수정할 내용을 입력하세요.
@@ -84,7 +85,7 @@ question = (
    depends_on: []
 3. 추론: 검색된 숙박비/식비 한도 및 출발 전 승인 요건 정보를 종합하여 정리해라.
    depends_on: [1, 2]
-
+```
 목표 '2026년 해외 출장의 숙박비와 식비 한도, 그리고 출발 전 승인 요건을 근거 문서와 함께 정리해줘.' 에 대한 에이전트의 초기 계획은 4단계 였지만 이렇게 실행할 경우 실제 문서 내용에 존재하지 않은 문서 번호, 제목, 발행일을 찾기 위해 불필요한 replan 이 실행된다. 
 따라서 계획 수정 피드백 "3번은 없어도 됨. 1, 2 에서 검색된 문서를 그냥 이용하면 되니까." 을 통해 llm 이 수정한 계획을 생성하여 3번 스텝이 사라진 것을 확인 하였다.
 
@@ -106,8 +107,8 @@ question = (
 
 일반 Edge는 `START → planner`, `finalizer → END`이다. 나머지는 State를 확인하는 Conditional Edge로 실행 경로를 결정한다. 사용자 피드백에 따른 `plan_editor`와 실행 중 자동 `replanner`는 서로 다른 기능이다.
 
-plan_editor는 최초 에이전트가 생성한 계획을 사용자로부터 피드백을 받아서 규칙을 수정하는 것이고
-replanner는 실행 중간에 에이전트가 계획을 수정하는 것이다.
+`plan_editor`는 최초 에이전트가 생성한 계획을 사용자로부터 피드백을 받아서 규칙을 수정하는 것이고
+`replanner`는 실행 중간에 에이전트가 계획을 수정하는 것이다.
 
 ### 3. State 설명
 
