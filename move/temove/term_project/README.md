@@ -5,7 +5,7 @@
 ## 주요 파일 구조
 
 ```text
-app/
+term_project/
 ├── agent/
 │   ├── core/
 │   │   ├── graph.py          # LangGraph로 에이전트 그래프 구성
@@ -36,7 +36,7 @@ pip install -r requirements.txt
 
 `.env` 파일에 `KAU_API_KEY`, `OPENAI_BASE_URL`, `MODEL_NAME`을 지정한다.
 
-# 테스트 코드
+#### 테스트 코드
 ```powershell
 python -m agent.core.graph
 ```
@@ -48,7 +48,7 @@ question = (
 
 계획이 출력되면 Enter로 승인하거나 자연어로 수정 요청을 입력한다.
 
-# test_langgraph_agent.ipynb 실행
+#### test_langgraph_agent.ipynb 실행
 제출용 테스트는 `test_langgraph_agent.ipynb`를 열어 Restart Kernel → Run All → Save 순서로 실행·저장한다.
 
 ## 구현 설명
@@ -60,7 +60,7 @@ question = (
 - 승인(Enter): `Command(resume={"approved": True})` → `executor` 실행
 - 수정(자연어): `Command(resume={"approved": False, "feedback": "수정 요청"})` → `plan_editor`에서 LLM이 계획 재작성 → `plan_review`에서 재승인
 
-# 테스트 예시
+#### 테스트 예시
 [계획 검토]
 목표: 2026년 해외 출장의 숙박비와 식비 한도, 그리고 출발 전 승인 요건을 근거 문서와 함께 정리해줘.
 질문: 이 계획을 승인하거나 수정할 내용을 입력하세요.
